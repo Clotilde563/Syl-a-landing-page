@@ -1,4 +1,5 @@
 
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -7,10 +8,10 @@
     <style>
         /* Variables globales */
         :root {
-            --primary-color: #212529;         /* Noir principal */
-            --secondary-color: #f8f9fa;       /* Blanc/gris très clair */
-            --accent-color: #5e60ce;          /* Légère touche de violet */
-            --hover-color: #4e4fc0;           /* Violet plus foncé pour hover */
+            --primary-color: #212529;
+            --secondary-color: #f8f9fa;
+            --accent-color: #5e60ce;
+            --hover-color: #4e4fc0;
             --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --transition-speed: 0.3s;
         }
@@ -179,13 +180,10 @@
             font-size: 16px;
         }
 
-        /* Footer */
-        footer {
-            padding: 40px 0;
-            text-align: center;
+        /* Prototype section */
+        .prototype-section {
+            padding: 100px 0;
             background-color: var(--secondary-color);
-            color: #6c757d;
-            font-size: 14px;
         }
 
         /* Form styles */
@@ -336,6 +334,15 @@
             border: 1px solid rgba(220, 53, 69, 0.2);
         }
 
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            background-color: var(--secondary-color);
+            color: #6c757d;
+            font-size: 14px;
+        }
+
         /* Responsive styles */
         @media (max-width: 768px) {
             .hero h1 {
@@ -401,14 +408,11 @@
     </style>
 </head>
 <body>
-    <!-- En-tête de la page -->
+    <!-- Header -->
     <header>
-        <div class="container">
-            <nav>
-                <a href="#" class="logo">Syléa</a>
-                <!-- Espace pour futur menu de navigation -->
-            </nav>
-        </div>
+        <nav class="container">
+            <a href="#" class="logo">Syléa</a>
+        </nav>
     </header>
 
     <!-- Section Hero -->
@@ -536,6 +540,7 @@
             <p>© 2025 Syléa — Tous droits réservés</p>
         </div>
     </footer>
+
     <script>
         // Script pour la gestion du formulaire et l'affichage des résultats
         document.addEventListener('DOMContentLoaded', function() {
@@ -549,8 +554,8 @@
             const option2PercentElement = document.getElementById('result-option2-percent');
             const notificationElement = document.getElementById('notification');
             
-            // URL de l'API pour l'envoi des données (à remplacer par votre endpoint réel)
-            const API_URL = 'https://api.sylea.fr/clients';
+            // Variable pour stocker les données (remplace localStorage pour cet environnement)
+            let syleavUsers = [];
             
             // Fonction pour afficher une notification
             function showNotification(message, type) {
@@ -564,39 +569,8 @@
                 }, 5000);
             }
             
-            // Fonction pour envoyer les données à l'API
-            async function sendDataToAPI(userData) {
-                try {
-                    // Version de l'API avec fetch (peut être adaptée selon vos besoins)
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(userData)
-                    });
-                    
-                    // En cas d'erreur HTTP
-                    if (!response.ok) {
-                        throw new Error('Problème lors de l\'envoi des données');
-                    }
-                    
-                    return await response.json();
-                } catch (error) {
-                    console.error('Erreur:', error);
-                    
-                    // Alternative : enregistrer dans le localStorage en cas d'échec
-                    const storedData = JSON.parse(localStorage.getItem('sylea_users') || '[]');
-                    storedData.push(userData);
-                    localStorage.setItem('sylea_users', JSON.stringify(storedData));
-                    
-                    // En environnement de production, on pourrait implémenter une logique de réessai
-                    return { stored: true, error: error.message };
-                }
-            }
-            
             // Gérer la soumission du formulaire
-            form.addEventListener('submit', async function(e) {
+            form.addEventListener('submit', function(e) {
                 e.preventDefault(); // Empêcher le rechargement de la page
                 
                 // Récupérer les valeurs du formulaire
@@ -618,18 +592,11 @@
                     submittedAt: new Date().toISOString()
                 };
                 
-                // Envoyer les données à l'API
                 try {
-                    // Pour la démo, simulons l'API avec le localStorage
-                    const storedData = JSON.parse(localStorage.getItem('sylea_users') || '[]');
-                    storedData.push(user);
-                    localStorage.setItem('sylea_users', JSON.stringify(storedData));
-                    
-                    // Dans un environnement réel, vous utiliseriez :
-                    // await sendDataToAPI(user);
-                    
-                    console.log('Données utilisateur enregistrées avec succès:', user);
-                    console.log('Liste complète des utilisateurs:', storedData);
+                    // Stocker les données
+                    syleavUsers.push(user);
+                    console.log('Données utilisateur enregistrées:', user);
+                    console.log('Liste complète des utilisateurs:', syleavUsers);
                     
                     // Générer des pourcentages aléatoires (somme = 100%)
                     const option1Percent = Math.floor(Math.random() * 101); // 0-100
@@ -644,23 +611,24 @@
                     option2PercentElement.textContent = option2Percent + '%';
                     
                     // Mettre en évidence l'option avec le pourcentage le plus élevé
+                    const resultCards = document.querySelectorAll('.result-card');
                     if (option1Percent > option2Percent) {
-                        document.querySelectorAll('.result-card')[0].style.borderLeft = '4px solid var(--accent-color)';
-                        document.querySelectorAll('.result-card')[1].style.borderLeft = 'none';
+                        resultCards[0].style.borderLeft = '4px solid var(--accent-color)';
+                        resultCards[1].style.borderLeft = 'none';
                     } else if (option2Percent > option1Percent) {
-                        document.querySelectorAll('.result-card')[1].style.borderLeft = '4px solid var(--accent-color)';
-                        document.querySelectorAll('.result-card')[0].style.borderLeft = 'none';
+                        resultCards[1].style.borderLeft = '4px solid var(--accent-color)';
+                        resultCards[0].style.borderLeft = 'none';
                     } else {
                         // Égalité
-                        document.querySelectorAll('.result-card')[0].style.borderLeft = '4px solid #aaa';
-                        document.querySelectorAll('.result-card')[1].style.borderLeft = '4px solid #aaa';
+                        resultCards[0].style.borderLeft = '4px solid #aaa';
+                        resultCards[1].style.borderLeft = '4px solid #aaa';
                     }
                     
                     // Cacher le formulaire et afficher les résultats
                     form.style.display = 'none';
                     resultsContainer.style.display = 'block';
                     
-                    // Faire défiler jusqu'aux résultats si nécessaire
+                    // Faire défiler jusqu'aux résultats
                     resultsContainer.scrollIntoView({ behavior: 'smooth' });
                     
                 } catch (error) {
@@ -675,35 +643,26 @@
                 resultsContainer.style.display = 'none';
                 form.style.display = 'block';
                 
+                // Réinitialiser le formulaire
+                form.reset();
+                
                 // Faire défiler jusqu'au formulaire
                 form.scrollIntoView({ behavior: 'smooth' });
             });
 
-            // Fonction pour exporter les données (pour admin)
-            function exportData() {
-                const data = localStorage.getItem('sylea_users');
-                if (data) {
-                    const blob = new Blob([data], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'sylea_users_' + new Date().toISOString().slice(0, 10) + '.json';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }
-            }
-            
-            // Pour debugging et accès administrateur - accessible via la console du navigateur
-            window.syleavlaa = {
-                exportData: exportData,
-                getAllUsers: () => JSON.parse(localStorage.getItem('sylea_users') || '[]'),
+            // Fonctions d'administration accessibles via la console
+            window.sylea = {
+                getAllUsers: () => syleavUsers,
+                getUserCount: () => syleavUsers.length,
                 clearData: () => {
-                    if (confirm('Êtes-vous sûr de vouloir supprimer toutes les données ?')) {
-                        localStorage.removeItem('sylea_users');
-                        alert('Données supprimées');
-                    }
+                    syleavUsers = [];
+                    console.log('Données supprimées');
                 }
+            };
+        });
+    </script>
+</body>
+</html>
             };
         });
     </script>
